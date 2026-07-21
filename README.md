@@ -40,7 +40,18 @@ Both share the same core logic, built from `invertedIndex.cpp` and `readFiles.cp
 - A C++17-compatible compiler (e.g. `g++`)
 
 ## How to Run
-
+First, add all the text files you want to search to a folder named `documents` in your current working directory:
+ 
+```
+your_project_folder/
+├── documents/
+│   ├── file1.txt
+│   ├── file2.txt
+│   └── ...
+├── main.cpp
+├── main_search.cpp
+└── ...
+```
 ### 1. Interactive Search
 
 Compile:
