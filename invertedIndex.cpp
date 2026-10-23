@@ -4,15 +4,6 @@ void InvertedIndex::saveToCache(const std::string &path) {
     std::ofstream out(path, std::ios::binary);
     if (!out.is_open()) return;
 
-    // index: word -> filename -> count
-    out << index.size() << "\n";
-    for (auto &[word, fileMap] : index) {
-        out << word << " " << fileMap.size() << "\n";
-        for (auto &[filename, count] : fileMap) {
-            out << filename << " " << count << "\n";
-        }
-    }
-
     // total_words: filename -> count
     out << total_words.size() << "\n";
     for (auto &[filename, count] : total_words) {
@@ -36,22 +27,8 @@ bool InvertedIndex::loadFromCache(const std::string &path) {
     if (!in.is_open()) return false;
 
     //building from the cache file
-    size_t indexSize;
-    if (!(in >> indexSize)) return false;
-    for (size_t i = 0; i < indexSize; i++) {
-        std::string word;
-        size_t fileCount;
-        in >> word >> fileCount;
-        for (size_t j = 0; j < fileCount; j++) {
-            std::string filename;
-            int count;
-            in >> filename >> count;
-            index[word][filename] = count;
-        }
-    }
-
     size_t totalWordsSize;
-    in >> totalWordsSize;
+    if ((!in >> totalWordsSize)) return false;
     for (size_t i = 0; i < totalWordsSize; i++) {
         std::string filename;
         int count;
@@ -60,7 +37,7 @@ bool InvertedIndex::loadFromCache(const std::string &path) {
     }
 
     size_t posIndexSize;
-    in >> posIndexSize;
+    if (!(in >> posIndexSize)) return false;
     for (size_t i = 0; i < posIndexSize; i++) {
         std::string word;
         size_t fileCount;
@@ -79,7 +56,6 @@ bool InvertedIndex::loadFromCache(const std::string &path) {
 }
 
 void InvertedIndex::insertIndex(std::string &s, std::string &filename, int idx) {
-    index[s][filename]++;
     total_words[filename]++;
     position_index[s][filename].push_back(idx);
 }
@@ -122,8 +98,7 @@ bool InvertedIndex::phraseSearch(std::vector<std::string> &s) {
 
     // Every word must exist in the index
     for (auto &word : s) {
-        if (index.find(word) == index.end()) {
-           // std::cout << "No Results" << std::endl;
+        if (position_index.find(word) == position_index.end()) {
             return false;
         }
     }
@@ -148,7 +123,6 @@ bool InvertedIndex::phraseSearch(std::vector<std::string> &s) {
     }
 
     if (candidates.empty()) {
-        //std::cout << "No Results" << std::endl;
         return false;
     }
 
@@ -175,16 +149,17 @@ void InvertedIndex::findIndex(std::vector<std::string> &s, int total_files) {
     std::unordered_map<std::string, double> scores;      
     std::unordered_map<std::string, int> matchedTerms;
     for (int i = 0; i < s.size(); i++) {
-        if (index.find(s[i]) == index.end()) continue;
-        int docs = index[s[i]].size();
-        for (auto it = index[s[i]].begin(); it != index[s[i]].end(); ++it) {
-            double score = tfidf(it -> second, total_words[it -> first], docs,total_files);
+        if (position_index.find(s[i]) == position_index.end()) continue;
+        int docs = position_index[s[i]].size();
+        for (auto it = position_index[s[i]].begin(); it != position_index[s[i]].end(); ++it) {
+            double score = tfidf((it -> second).size(), total_words[it -> first], docs,total_files);
             scores[it -> first] += score;
             matchedTerms[it -> first]++;
         }
     }
     if (scores.empty()) {
         std::cout << "No Results" << std::endl;
+        return;
     }
    
     std::vector<std::pair<std::string, double>> result;
@@ -208,14 +183,6 @@ void InvertedIndex::findIndex(std::vector<std::string> &s, int total_files) {
         std::cout << (i + 1) << ". " << result[i].first
                    << " (score: " << std::fixed << std::setprecision(4) << result[i].second << ")\n";
     }
-}
-
-
-// invertedindex.cpp
-
-const std::unordered_map<std::string, std::unordered_map<std::string, int>>&
-InvertedIndex::getIndex() const {
-    return index;
 }
 
 const std::unordered_map<std::string, int>&

@@ -17,7 +17,6 @@ namespace fs = std::filesystem;
 
 class InvertedIndex{
 private:
-    std::unordered_map<std::string, std::unordered_map<std::string, int>> index;
     std::unordered_map<std::string, int> total_words;
     std::unordered_map<std::string, std::unordered_map<std::string, std::vector<int>>> position_index;
 
@@ -28,7 +27,6 @@ public:
     double tfidf(int termCount, int docLength, int docsWitTerm, int total_files);
     void findIndex(std::vector<std::string> &s, int total_files);
     bool phraseSearch(std::vector<std::string> &s);
-    const std::unordered_map<std::string, std::unordered_map<std::string, int>>& getIndex() const;
     const std::unordered_map<std::string, int>& getTotalWords() const;
 
     void saveToCache(const std::string &path);
