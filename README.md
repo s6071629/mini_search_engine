@@ -90,9 +90,9 @@ $ ./search
 Enter search query: machine learning
 
 Results (ranked by TF-IDF):
-1. article3.txt   (score: 0.842)
-2. notes.txt      (score: 0.615)
-3. article1.txt   (score: 0.203)
+1. article3.txt   (3 occurence(s))
+2. notes.txt      (2 ocuurence(s))
+3. article1.txt   (1 occurence(s))
 ```
 
 
